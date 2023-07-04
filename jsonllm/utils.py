@@ -56,7 +56,7 @@ def _to_dict_replacement(raw_response: str):
 
 
 def _to_dict_regex(raw_response: str):
-    for i, pattern in REGEX_PATTERNS:
+    for i, pattern in enumerate(REGEX_PATTERNS):
         try:
             matches = re.findall(pattern, raw_response)
             n_matches = len(matches) 
