@@ -18,7 +18,6 @@ person = {
     'date_of_birth': {
         'output_name': 'dob',
         'types': str,
-        'caster': lambda dob: parse(dob).date(),
         'instructions': 'Find the date of birth and cast it to isoformat'
     }
 }

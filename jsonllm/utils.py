@@ -66,5 +66,5 @@ def _to_dict_regex(raw_response: str):
                 warnings.warn(f'Found {n_matches} matches found')
             return json.loads(matches[0])
         except JSONDecodeError as e:
-            if i == len(REGEX_PATTERNS)-1: raise e
-    
+            pass
+    raise JSONDecodeError('No matches found', raw_response, 0)
