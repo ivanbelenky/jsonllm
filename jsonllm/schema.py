@@ -1,100 +1,96 @@
-import warnings
-import dataclasses
-from dataclasses import dataclass, field, fields, Field
-from typing import Tuple, Callable, Union, Any, Dict, List, NewType, TypeVar
+from json.decoder import JSONDecodeError
+from typing import (
+    Union, 
+    TypedDict, 
+    Optional, 
+)
+
+from jsonllm.utils import _to_dict_replacement, _to_dict_regex
 
 
 JSONCompatible = Union[str, int, float, bool, None, dict, list]
 JSONtypes = (str, int, float, bool, None, dict, list)
 
+class Validator: pass
+class Caster: pass
 
-class Schema(type): pass
-class Dataclass(type): pass
-class UnparseableField(type): pass
-
-
-class SchemaError(Exception):
-    def __init__(self):
-        super().__init__("No field was of type Field")
-
-
-@dataclass
-class ToParse:
-    name: str = None
-    types: Union[type, Tuple[type, ...]] = JSONtypes
-    caster: Callable[[Any], Any] = None
-    valid: Callable[[Any], bool] = None
-    needed: bool = False
-    instructions: str = None
-    default: Any = None
+class SchemaKey(TypedDict):
+    name: Optional[str]
+    type: Optional[type]
+    default: JSONCompatible
+    required: Optional[bool]
+    instructions: Optional[str]
+    valid: Optional[Caster] 
+    caster: Optional[Validator]
 
 
-def parse_field(name=None,    
-                types=None,
-                caster=None,
-                valid=None,
-                needed=False,
-                instructions='',
-                default=None) -> ToParse:
-    '''Create a field that can be used to parse a json response.'''
-    types = types if isinstance(types, tuple) else (types,)
-    return field(default=ToParse(name=name, types=types, caster=caster, 
-                                      valid=valid, needed=needed, instructions=instructions, 
-                                      default=default))
+class Schema(TypedDict):
+    __key__: Union[SchemaKey, 'Schema']
 
 
-def _strip_unparseable_fields_from_schema(schema_dict) -> None:
-    '''Remove all keys that have NotParseableField as their value'''
-    for field_name, field_info in schema_dict.items():
-        if isinstance(field_info, UnparseableField):
-            del schema_dict[field_name]
-        elif isinstance(field_info, dict):
-            _strip_unparseable_fields_from_schema(field_info)
+SchemaError = TypeError(f"Schema must be a dictionary following {Schema}")
 
 
-def _dataclass_to_schema_dict(_dataclass: Dataclass) -> Dict[str, Any]:
-    '''From dataclass to dictionary schema containing only the ToParseableFields'''
-    schema = {}
-    for _field in fields(_dataclass):
-        tp_field = _field.default
-        if not isinstance(tp_field, ToParse):
-            schema[_field.name] = UnparseableField
-        elif isinstance(tp_field, ToParse):
-            if any([dataclasses.is_dataclass(tp) for tp in tp_field.types]):
-                schema[_field.name] = _dataclass_to_schema_dict(tp_field.types[0])
-            else:
-                schema[_field.name] = {
-                    'types': tp_field.types,
-                    'needed': tp_field.needed,
-                    'instructions': tp_field.instructions,
-                    'default': tp_field.default,
-                    'name': tp_field.name if tp_field.name else tp_field.name,
-                }
-    return schema
+class ParsedResponse:
+    def __init__(self, raw_response: str, schema: Schema):
+        self.raw_response = raw_response
+        self.schema = schema
+        self.response_dict = self.to_dict(raw_response)
+        self.validate_missing_cast()
+
+    def to_dict(self, raw_response=None) -> dict:
+        '''Convert the raw response to a dictionary'''
+        raw_response = raw_response or self.raw_response
+        try:
+            response = _to_dict_replacement(raw_response)
+            return self.rename_keys(response)
+        except JSONDecodeError as e:
+            pass
+        try:
+            response = _to_dict_regex(raw_response)
+            return self.rename_keys(response)
+        except JSONDecodeError as e:
+            raise e
+        
+    def validate_missing_cast(self, response: dict) -> dict:
+        raise NotImplementedError
+
+    @staticmethod
+    def _rename_keys(schema, response: dict) -> dict:
+        #TODO: nested
+        return {schema.get(k, {}).get('name', k): v for k,v in response.items()}
+        
+        
+
+def is_valid_schema_key(key: Union[SchemaKey, Schema]) -> bool:
+    '''Being a valid key is either holding the SchemaKey type or a Schema'''
+    if len(key) == 0:
+        return False
+    if all(isinstance(v, dict) for v in key.values()):
+        return all(is_valid_schema_key(v) for v in key.values())
+    if any(isinstance(v, dict) for v in key.values()):
+        return False
+    if any(keys not in SchemaKey.__annotations__ for keys in key.keys()):
+        return False
+
+    for k, a in SchemaKey.__annotations__.items():
+        if any(isinstance(t, (Validator, Caster)) for t in a.__args__):
+            continue
+        if all(not isinstance(key.get(k), t) for t in a.__args__): 
+            return False
+    return True
 
 
-def _validate_schema_dict(schema_dict: Dict[str, Any], invalid_fields: List[str], field_name: str):
-    for child_field_name, child_field_info in schema_dict.items():
-        if isinstance(child_field_info, UnparseableField):
-            invalid_fields.append(f'{field_name}.{child_field_name}')
-        elif isinstance(child_field_info, dict):
-            _validate_schema_dict(child_field_info, invalid_fields, f'{field_name}.{child_field_name}')
+def is_valid_schema(schema: Schema) -> bool:
+    for sk, sv in schema.items():
+        if not isinstance(sk, str): 
+            return False
+        if isinstance(sv, dict):
+            if not is_valid_schema_key(sv): 
+                return False
+    return True
 
 
-def validate_schema(schema: Union[Dataclass, Dict[str, Union[Any, Field]]]):
-    invalid_fields = []
-    if dataclasses.is_dataclass(schema):
-        schema_dict = _dataclass_to_schema_dict(schema)
-    
-    for field_name, field_info in schema_dict.items():
-        if isinstance(field_info, UnparseableField):
-            invalid_fields.append(field_name)
-        elif isinstance(field_info, dict):
-            _validate_schema_dict(field_info, invalid_fields, field_name)
-
-    invalid_fields_n = len(invalid_fields)
-    if invalid_fields_n > 0:
-        warnings.warn(f"Invalid fields: {invalid_fields}")
-    _strip_unparseable_fields_from_schema(schema_dict)
-    if not schema_dict:
-        raise SchemaError()
+def validate_schema(schema: Schema):
+    if not isinstance(schema, dict) or is_valid_schema(schema):
+        raise SchemaError

@@ -51,8 +51,8 @@ class Completion:
         - †ext-bison@001
         '''
         try:
-            project_id = "trbs-dev" if os.environ.get('TRUCKBASE_SERVER') in ['DEVELOPMENT', 'LOCAL'] else "trbs-prod"
-            location = "us-central1"
+            project_id = None # TODO: config['project_id']
+            location = None # TODO: "us-central1"
             parameters = {
                     "temperature": temperature,
                     "max_output_tokens": 1024,
@@ -63,13 +63,10 @@ class Completion:
             vertexai.init(project=project_id, location=location)
             if 'chat' in model:
                 chat_model = ChatModel.from_pretrained(model)
-                chat = chat_model.start_chat(examples=[])
-                response=chat.send_message(prompt, **parameters)
-                raw_response = response.text
+                raw_response = chat_model.start_chat(examples=[]).send_message(prompt, **parameters).text
             elif 'text' in model:
                 text_model = TextGenerationModel.from_pretrained(model)
-                response = text_model.predict(prompt, **parameters)
-                raw_response = response.text
+                raw_response = text_model.predict(prompt, **parameters).text
 
             return raw_response
         except Exception as e:
@@ -79,45 +76,13 @@ class Completion:
     def complete_prompt(prompt: str,
                         llm: str,
                         model: str,
-                        *,
-                        temperature: float = 0.0,
+                        **model_kwargs,
                         ):
-        '''Completes prompt using specified strategy.
-
-        Parameters
-        ----------
-        prompt : str
-            prompt to complete
-        llm : str, optional
-            language model to use, by default 'openai', one of ['openai', 'llama', 'bard']
-        max_tokens : int, optional
-            max tokens to use for completion, by default MAX_TOKENS
-        temperature : float, optional
-            temperature defines the randomness of the predictions, the higher the more random, by default 0.0
-            particular care must be taken with different models since they establish different ranges for temperature
-            - openai: [0.0, 2.0]
-            - llama: NotImplemented
-            - bard: NotImplemented
-        model : str, optional
-            - openai: https://beta.openai.com/docs/api-reference/completions/create
-            - llama: NotImplemented
-            - bard: NotImplemented
-
-        Returns
-        -------
-        raw_response: str
-            raw response from completion
-
-        Raises
-        ------
-        ClientError
-            raised when completion fails on the client side, e.g. not enough tokens, wrong api key, etc.
-        ServerError
-            raised when completion fails on the side of the LLM provider
+        '''
         '''
         if llm == 'openai':
-            return Completion.openai(prompt, temperature=temperature, model=model)
+            return Completion.openai(prompt, model, **model_kwargs)
         elif llm == 'google':
-            return Completion.google_completion(prompt, temperature=temperature, model=model)
+            return Completion.google_completion(prompt, model=model, **model_kwargs)
         else:
             raise NotImplementedError(f"Completion model {llm} not implemented")

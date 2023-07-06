@@ -14,7 +14,6 @@ REGEX_PATTERNS = [
     r'\[[^\[\]]*\]',
 ]
 
-
 MAX_TOKENS = {
     'chat-bison@001': -1, #TODO: check limits
     'ada': 2048,
