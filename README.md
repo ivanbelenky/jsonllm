@@ -2,7 +2,7 @@
 
 ```python
 import jsonllm
-jsonllm.config('openai', 'sk-123')
+jsonllm.config('openai', 'sk-#################')
 
 person = {
     'first_name': {
@@ -24,7 +24,7 @@ person = {
 }
 
 message = 'My name is John Connor, I think I was born 0 of Unix time.'
-response = jsonllm.loads(message, schema=Person, completion='openai')
+response = jsonllm.loads(message, person, completion='openai')
 print(response)
 
 {
