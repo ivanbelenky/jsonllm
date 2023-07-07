@@ -9,18 +9,18 @@ openai.api_key = 'sk-...'
 
 person = {
     'first_name': {
-        'types': str,
+        'type': str,
         'needed': True,
         'instructions': 'Find the first name, if not found input John'        
     },
     'last_name': {
-        'types': str,
+        'type': str,
         'needed': True,
         'instructions': 'Find the last name, if not found input Doe'
     },
     'date_of_birth': {
-        'output_name': 'dob',
-        'types': str,
+        'name': 'dob',
+        'type': str,
         'instructions': 'Find the date of birth and cast it to isoformat'
     }
 }

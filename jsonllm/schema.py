@@ -50,7 +50,7 @@ def is_valid_schema(schema: Schema) -> bool:
             if not is_valid_schema_key(sv): return False
     return True
 
-def validate_schema(schema: Schema):
+def validate_schema(schema: Schema) -> None:
     if not isinstance(schema, dict) or is_valid_schema(schema): raise SchemaError
 
 def to_prompt(schema: Schema, text: str) -> str:
