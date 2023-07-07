@@ -34,10 +34,11 @@ SchemaError = TypeError(f"Schema must be a dictionary following {Schema}")
 def is_valid_schema_key(key: Union[SchemaKey, Schema]) -> bool:
     '''Being a valid key is either holding the SchemaKey type or a Schema'''
     if len(key) == 0: return False
-    if all(isinstance(v, dict) for v in key.values()): 
+    if all(isinstance(v, dict) for v in key.values()) and len(key) > 1:
         return all(is_valid_schema_key(v) for v in key.values())
     if any(isinstance(v, dict) for v in key.values()): return False
-    if any(keys not in SchemaKey.__annotations__ for keys in key.keys()): return False
+    print(SchemaKey.__annotations__.keys(), key.keys())
+    if any(k not in SchemaKey.__annotations__ for k in key.keys()): return False
     for k, a in SchemaKey.__annotations__.items():
         if any(isinstance(t, (Validator, Caster)) for t in a.__args__): continue
         if all(not isinstance(key.get(k), t) for t in a.__args__): return False
@@ -51,7 +52,7 @@ def is_valid_schema(schema: Schema) -> bool:
     return True
 
 def validate_schema(schema: Schema) -> None:
-    if not isinstance(schema, dict) or is_valid_schema(schema): raise SchemaError
+    if not isinstance(schema, dict) or not is_valid_schema(schema): raise SchemaError
 
 def to_prompt(schema: Schema, text: str) -> str:
     shortened_schema = {k:{'type': v['type'].__name__, 'instructions': v['instructions']} 
