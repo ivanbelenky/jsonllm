@@ -42,5 +42,6 @@ Given the following text:
 \"\"\"
 
 Create a JSON parseable object with the following schema. If keys are not found input null.
+
 <schema>
 """

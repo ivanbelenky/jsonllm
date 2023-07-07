@@ -14,6 +14,6 @@ def loads(text: str,
           **model_kwargs) -> ParsedResponse:
     '''Load a schema from a completion prompt'''
     validate_schema(schema)
-    complete = retry(_Completion.ClientError, tries=retries)(_Completion.complete_prompt)
+    complete = retry(_Completion.ServerError, tries=retries)(_Completion.complete_prompt)
     prompt = prompt if prompt is not None else to_prompt(schema, text)
     return ParsedResponse(complete(text, llm, model, **model_kwargs), schema)
