@@ -2,7 +2,10 @@
 
 ```python
 import jsonllm
-jsonllm.config('openai', 'sk-#################')
+import openai
+
+# vertexai.init(project_id='jsonllm-rocks?', location='us-central1') | 
+openai.api_key = 'sk-...'
 
 person = {
     'first_name': {

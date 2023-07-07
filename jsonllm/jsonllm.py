@@ -1,10 +1,8 @@
-import json
-from time import sleep
-from dateutil.parser import parse
+from retry import retry
 
-from jsonllm.schema import Schema, ParsedResponse, validate_schema
-from jsonllm.completions import Completion
-    
+from jsonllm.schema import Schema, ParsedResponse, validate_schema, to_prompt
+from jsonllm.completions import _Completion
+
 
 def loads(text: str,
           schema: Schema,
@@ -12,8 +10,10 @@ def loads(text: str,
           llm: str='openai',
           model: str='gpt-3.5-turbo',
           retries: int=0,
-          temperature: float=0.) -> ParsedResponse:
+          prompt: str=None,
+          **model_kwargs) -> ParsedResponse:
     '''Load a schema from a completion prompt'''
     validate_schema(schema)
-    raw_response = Completion.complete_prompt(text, llm, model, temperature)
-    return ParsedResponse(raw_response, schema)
+    complete = retry(_Completion.ClientError, tries=retries)(_Completion.complete_prompt)
+    prompt = prompt if prompt is not None else to_prompt(schema, text)
+    return ParsedResponse(complete(text, llm, model, **model_kwargs), schema)

@@ -1,3 +1,4 @@
+import json
 from json.decoder import JSONDecodeError
 from typing import (
     Union, 
@@ -6,7 +7,11 @@ from typing import (
 )
 
 from jsonllm.utils import _to_dict_replacement, _to_dict_regex
-
+from jsonllm.constants import (
+    PROMPT_TO_PARSE_SCHEMA,
+    SCHEMA_PLACEHOLDER,
+    TEXT_PLACEHOLDER
+)
 
 JSONCompatible = Union[str, int, float, bool, None, dict, list]
 JSONtypes = (str, int, float, bool, None, dict, list)
@@ -27,6 +32,14 @@ class SchemaKey(TypedDict):
 class Schema(TypedDict):
     __key__: Union[SchemaKey, 'Schema']
 
+
+def to_prompt(schema: Schema, text: str) -> str:
+    shortened_schema = {k:{'type': v['type'].__name__, 'instructions': v['instructions']} 
+                        for k,v in schema.items() if v.get('instructions', False)}
+    shortened_schema.update({k:{'type':v['type'].__name__} for k,v in schema.items() if not v.get('instructions', False)})
+    dumped_schema = json.dumps(shortened_schema, indent=4)
+    return PROMPT_TO_PARSE_SCHEMA.replace(SCHEMA_PLACEHOLDER, dumped_schema).replace(TEXT_PLACEHOLDER, text)
+           
 
 SchemaError = TypeError(f"Schema must be a dictionary following {Schema}")
 
@@ -64,33 +77,25 @@ class ParsedResponse:
 
 def is_valid_schema_key(key: Union[SchemaKey, Schema]) -> bool:
     '''Being a valid key is either holding the SchemaKey type or a Schema'''
-    if len(key) == 0:
-        return False
-    if all(isinstance(v, dict) for v in key.values()):
+    if len(key) == 0: return False
+    if all(isinstance(v, dict) for v in key.values()): 
         return all(is_valid_schema_key(v) for v in key.values())
-    if any(isinstance(v, dict) for v in key.values()):
-        return False
-    if any(keys not in SchemaKey.__annotations__ for keys in key.keys()):
-        return False
-
+    if any(isinstance(v, dict) for v in key.values()): return False
+    if any(keys not in SchemaKey.__annotations__ for keys in key.keys()): return False
     for k, a in SchemaKey.__annotations__.items():
-        if any(isinstance(t, (Validator, Caster)) for t in a.__args__):
-            continue
-        if all(not isinstance(key.get(k), t) for t in a.__args__): 
-            return False
+        if any(isinstance(t, (Validator, Caster)) for t in a.__args__): continue
+        if all(not isinstance(key.get(k), t) for t in a.__args__): return False
+
     return True
 
 
 def is_valid_schema(schema: Schema) -> bool:
     for sk, sv in schema.items():
-        if not isinstance(sk, str): 
-            return False
+        if not isinstance(sk, str): return False
         if isinstance(sv, dict):
-            if not is_valid_schema_key(sv): 
-                return False
+            if not is_valid_schema_key(sv): return False
     return True
 
 
 def validate_schema(schema: Schema):
-    if not isinstance(schema, dict) or is_valid_schema(schema):
-        raise SchemaError
+    if not isinstance(schema, dict) or is_valid_schema(schema): raise SchemaError
