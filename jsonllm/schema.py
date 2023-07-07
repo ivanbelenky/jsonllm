@@ -68,12 +68,17 @@ class ParsedResponse:
         self.raw_response_dict = self.to_dict(raw_response)
         self.missing, self.invalid, self.exceptions = [], [], {}
         self.validated_casted_response = self.validate_missing_cast(self.raw_response_dict, self.schema, name or 'root', self.missing, self.invalid, self.exceptions)
+        self.renamed_response = self._rename_keys(self.validated_casted_response)
+
+    @property
+    def response(self) -> dict:
+        return self.renamed_response
 
     def to_dict(self, raw_response=None) -> dict:
         raw_response = raw_response or self.raw_response
-        try: return self._rename_keys(_to_dict_replacement(raw_response))
+        try: return _to_dict_replacement(raw_response)
         except JSONDecodeError: pass
-        try:  return self._rename_keys(_to_dict_regex(raw_response))
+        try:  return _to_dict_regex(raw_response)
         except JSONDecodeError: pass
         raise JSONDecodeError('No JSON parseable matches found for response: ', raw_response, 0)
         

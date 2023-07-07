@@ -29,8 +29,8 @@ person = {
 }
 
 message = 'My name is John Connor, I think I was born 0 of Unix time.'
-response = jsonllm.loads(message, person, completion='openai')
-print(response)
+response = jsonllm.loads(message, person, model='gpt-3.5-turbo')
+print(response.response)
 
 {
     'first_name': 'John',
