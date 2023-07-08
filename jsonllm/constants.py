@@ -39,15 +39,15 @@ EXAMPLES_PROMPTS = [
 
 SCHEMA_PLACEHOLDER = '<schema>'
 TEXT_PLACEHOLDER = '<text>'
-PROMPT_TO_PARSE_SCHEMA = """
+PROMPT_TO_PARSE_SCHEMA = f"""
 Given the following text:
 
 \"\"\"
-<text>
+{TEXT_PLACEHOLDER}
 \"\"\"
 
 Create a JSON object with the following keys. If keys are not found input null.
 Follow the instructions to find the key values in the text.
 
-<schema>
+{SCHEMA_PLACEHOLDER}
 """

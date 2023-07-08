@@ -3,7 +3,6 @@ from copy import deepcopy
 from json.decoder import JSONDecodeError
 from typing import Union, TypedDict, Optional, List, Dict
 
-
 from jsonllm.utils import _to_dict_replacement, _to_dict_regex
 from jsonllm.constants import (
     PROMPT_TO_PARSE_SCHEMA,
@@ -37,7 +36,6 @@ def is_valid_schema_key(key: Union[SchemaKey, Schema]) -> bool:
     if all(isinstance(v, dict) for v in key.values()) and len(key) > 1:
         return all(is_valid_schema_key(v) for v in key.values())
     if any(isinstance(v, dict) for v in key.values()): return False
-    print(SchemaKey.__annotations__.keys(), key.keys())
     if any(k not in SchemaKey.__annotations__ for k in key.keys()): return False
     for k, a in SchemaKey.__annotations__.items():
         if any(isinstance(t, (Validator, Caster)) for t in a.__args__): continue
@@ -72,8 +70,7 @@ class ParsedResponse:
         self.renamed_response = self._rename_keys(self.validated_casted_response)
 
     @property
-    def response(self) -> dict:
-        return self.renamed_response
+    def response(self) -> dict: return self.renamed_response
 
     def to_dict(self, raw_response=None) -> dict:
         raw_response = raw_response or self.raw_response
