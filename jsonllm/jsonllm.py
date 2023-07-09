@@ -1,7 +1,9 @@
-from retry import retry
+from typing import Optional, Union, Dict
 
-from jsonllm.schema import Schema, ParsedResponse, validate_schema, to_prompt
-from jsonllm.completions import _Completion
+from retry import retry # type: ignore
+
+from .schema import Schema, ParsedResponse, validate_schema, to_prompt
+from .completions import _Completion
 
 
 def loads(text: str,
@@ -9,8 +11,8 @@ def loads(text: str,
           *,
           model: str='gpt-3.5-turbo',
           retries: int=1,
-          prompt: str=None,
-          **model_kwargs) -> ParsedResponse:
+          prompt: Optional[str]=None,
+          **model_kwargs: Dict[str, Union[str, float, int]]) -> ParsedResponse:
     '''Load a schema from a completion prompt'''
     validate_schema(schema)
     complete = retry(_Completion.ServerError, tries=retries)(_Completion.complete_prompt)

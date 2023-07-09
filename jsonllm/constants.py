@@ -1,4 +1,9 @@
-REPLACEMENTS = [
+from typing import Dict, List, Union, Any
+
+JSONCompatible = Union[str, int, float, bool, None, dict, list]
+JSONtypes = (str, int, float, bool, None, dict, list)
+
+REPLACEMENTS: List[Dict[str, str]] = [
     {},
     {
     '\'': '"',
@@ -8,8 +13,6 @@ REPLACEMENTS = [
 
 OPENAI_MODELS = ['ada', 'babbage', 'curie', 'davinci', 'gpt-3.5-turbo']
 GOOGLE_MODELS = ['chat-bison@001', 'text-bison@001']
-
-DEFAULT_REPLACE = REPLACEMENTS[1]
 
 REGEX_PATTERNS = [r'{[^{}]*}', r'\[[^\[\]]*\]']
 
@@ -23,7 +26,7 @@ MAX_TOKENS = {
 }
 
 DEFAULT_TEMPERATURE = 0.
-DEFAULT_MODEL_KWARGS = {
+DEFAULT_MODEL_KWARGS: Dict[str, Dict[str, Any]] = {
     'chat-bison@001': {'temperature': DEFAULT_TEMPERATURE, 'max_output_tokens': 1024, 'top_p': 0.8, 'top_k': 40},
     'text-bison@001': {'temperature': DEFAULT_TEMPERATURE, 'max_output_tokens': 1024, 'top_p': 0.8, 'top_k': 40},
     'ada': {'temperature': DEFAULT_TEMPERATURE},
