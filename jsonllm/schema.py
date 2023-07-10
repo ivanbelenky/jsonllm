@@ -12,7 +12,6 @@ from jsonllm.constants import (
     JSONtypes
 )
 
-
 class Validator: pass
 class Caster: pass
 
