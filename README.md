@@ -36,11 +36,14 @@ class Schema(TypedDict):
 ### Example
 
 ```python
+import os
+
 import jsonllm
 import openai
 
 # vertexai.init(project_id='jsonllm-rocks?', location='us-central1') | 
-openai.api_key = 'sk-...'
+# openai.api_key = 'sk-...'
+os.environ['ANTHROPIC_API_KEY'] = '...'
 
 person = {
     'first_name': {
@@ -61,7 +64,7 @@ person = {
 }
 
 message = 'My name is John Connor, I think I was born 0 of Unix time.'
-response = jsonllm.loads(message, person, model='gpt-3.5-turbo')
+response = jsonllm.loads(message, person, model='claude-3-opus-20240229')
 print(response.response)
 
 {

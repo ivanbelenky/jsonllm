@@ -1,15 +1,38 @@
+import os
 from typing import Dict, Union
 
+import dotenv
 from openai import ChatCompletion, Completion
 from vertexai.preview.language_models import ChatModel, TextGenerationModel # type: ignore
+from anthropic import Anthropic, APIError, APIConnectionError, APITimeoutError, APIStatusError
  
-from .utils import no_tokens, OpenAIErrors
+from .utils import no_tokens, OpenAIErrors, AnthropicErrors
 from .constants import MAX_TOKENS, DEFAULT_MODEL_KWARGS, OPENAI_MODELS, GOOGLE_MODELS
+
+try:
+    dotenv.load_dotenv()
+    client = Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+except Exception as e:
+    client = None
 
 
 class _Completion:
     class ClientError(Exception): pass
     class ServerError(Exception): pass
+
+    @staticmethod
+    def _anthropic(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
+        try:
+            model_kwargs = model_kwargs or DEFAULT_MODEL_KWARGS[model]
+            message = client.messages.create(
+                model=model or "claude-3-opus-20240229", **model_kwargs,
+                messages=[{"role": "user", "content": [{"type": "text", "text": prompt}]}]
+            )
+            return message.content
+        except AnthropicErrors as e:
+            raise _Completion.ServerError(f"Failed to complete prompt: {e}")
+        except Exception as e:
+            raise _Completion.ClientError(f"Failed to complete prompt: {e}")
 
     @staticmethod
     def _openai(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:

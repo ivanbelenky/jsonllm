@@ -33,7 +33,8 @@ DEFAULT_MODEL_KWARGS: Dict[str, Dict[str, Any]] = {
     'babbage': {'temperature': DEFAULT_TEMPERATURE},
     'curie': {'temperature': DEFAULT_TEMPERATURE},
     'davinci': {'temperature': DEFAULT_TEMPERATURE},
-    'gpt-3.5-turbo': {'temperature': DEFAULT_TEMPERATURE},    
+    'gpt-3.5-turbo': {'temperature': DEFAULT_TEMPERATURE},
+    'claude-3-opus-20240229': {'temperature': DEFAULT_TEMPERATURE, 'max_tokens': 4096},
 }
 
 EXAMPLES_PROMPTS = [

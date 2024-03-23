@@ -9,7 +9,7 @@ from .completions import _Completion
 def loads(text: str,
           schema: Schema,
           *,
-          model: str='gpt-3.5-turbo',
+          model: str='claude-3-opus-20240229',
           retries: int=1,
           prompt: Optional[str]=None,
           **model_kwargs: Dict[str, Union[str, float, int]]) -> ParsedResponse:

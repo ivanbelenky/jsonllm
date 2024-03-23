@@ -6,16 +6,22 @@ from json import JSONDecodeError
 
 import tiktoken
 from openai.error import (
-    RateLimitError, 
-    APIConnectionError, 
-    APIError,
-    ServiceUnavailableError, 
-    Timeout
+    RateLimitError as OAIRateLimitError, 
+    APIConnectionError as OAIAPIConnectionError, 
+    APIError as OAIAPIError,
+    ServiceUnavailableError as OAIServiceUnavailableError, 
+    Timeout as OAITimeout
 )
+from anthropic import (APIError as AnthAPIError, 
+                       APIConnectionError as AnthAPIConnectionError,
+                       APITimeoutError as AnthAPITimeoutError, 
+                       APIStatusError as AnthAPIStatusError)
 
 from .constants import REPLACEMENTS, REGEX_PATTERNS, JSONCompatible
 
-OpenAIErrors = (RateLimitError, APIConnectionError, APIError, ServiceUnavailableError, Timeout)
+OpenAIErrors = (OAIRateLimitError, OAIAPIConnectionError, OAIAPIError, OAIServiceUnavailableError, OAITimeout)
+AnthropicErrors = (AnthAPIError, AnthAPIConnectionError, AnthAPITimeoutError, AnthAPIStatusError)
+
 
 def no_tokens_approx(prompt: str) -> int:
     prompt_tokens = max(len(prompt)//4,4)
