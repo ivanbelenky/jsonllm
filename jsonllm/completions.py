@@ -7,11 +7,11 @@ from vertexai.preview.language_models import ChatModel, TextGenerationModel # ty
 from anthropic import Anthropic, APIError, APIConnectionError, APITimeoutError, APIStatusError
  
 from .utils import no_tokens, OpenAIErrors, AnthropicErrors
-from .constants import MAX_TOKENS, DEFAULT_MODEL_KWARGS, OPENAI_MODELS, GOOGLE_MODELS
+from .constants import MAX_TOKENS, DEFAULT_MODEL_KWARGS, OPENAI_MODELS, GOOGLE_MODELS, ANTHROPIC_MODELS
 
 try:
     dotenv.load_dotenv()
-    client = Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+    anthropic_client = Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 except Exception as e:
     client = None
 
@@ -24,11 +24,11 @@ class _Completion:
     def _anthropic(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
         try:
             model_kwargs = model_kwargs or DEFAULT_MODEL_KWARGS[model]
-            message = client.messages.create(
+            message = anthropic_client.messages.create(
                 model=model or "claude-3-opus-20240229", **model_kwargs,
                 messages=[{"role": "user", "content": [{"type": "text", "text": prompt}]}]
             )
-            return message.content
+            return message.content[0].text
         except AnthropicErrors as e:
             raise _Completion.ServerError(f"Failed to complete prompt: {e}")
         except Exception as e:
@@ -67,4 +67,5 @@ class _Completion:
     def complete_prompt(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
         if model in OPENAI_MODELS: return _Completion._openai(prompt, model=model, **model_kwargs)
         elif model in GOOGLE_MODELS: return _Completion._google(prompt, model=model, **model_kwargs)
+        elif model in ANTHROPIC_MODELS: return _Completion._anthropic(prompt, model=model, **model_kwargs)
         else: raise NotImplementedError(f"Completion model {model} not implemented")

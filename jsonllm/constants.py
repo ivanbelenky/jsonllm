@@ -13,6 +13,7 @@ REPLACEMENTS: List[Dict[str, str]] = [
 
 OPENAI_MODELS = ['ada', 'babbage', 'curie', 'davinci', 'gpt-3.5-turbo']
 GOOGLE_MODELS = ['chat-bison@001', 'text-bison@001']
+ANTHROPIC_MODELS = ['claude-3-opus-20240229']
 
 REGEX_PATTERNS = [r'{[^{}]*}', r'\[[^\[\]]*\]']
 

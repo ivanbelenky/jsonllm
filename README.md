@@ -43,7 +43,7 @@ import openai
 
 # vertexai.init(project_id='jsonllm-rocks?', location='us-central1') | 
 # openai.api_key = 'sk-...'
-os.environ['ANTHROPIC_API_KEY'] = '...'
+os.environ['ANTHROPIC_API_KEY'] = '...' # or load env
 
 person = {
     'first_name': {
