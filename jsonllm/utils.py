@@ -5,12 +5,10 @@ from typing import Dict, Any
 from json import JSONDecodeError
 
 import tiktoken
-from openai.error import (
+from openai import (
     RateLimitError as OAIRateLimitError, 
     APIConnectionError as OAIAPIConnectionError, 
     APIError as OAIAPIError,
-    ServiceUnavailableError as OAIServiceUnavailableError, 
-    Timeout as OAITimeout
 )
 from anthropic import (APIError as AnthAPIError, 
                        APIConnectionError as AnthAPIConnectionError,
@@ -19,7 +17,7 @@ from anthropic import (APIError as AnthAPIError,
 
 from .constants import REPLACEMENTS, REGEX_PATTERNS
 
-OpenAIErrors = (OAIRateLimitError, OAIAPIConnectionError, OAIAPIError, OAIServiceUnavailableError, OAITimeout)
+OpenAIErrors = (OAIRateLimitError, OAIAPIConnectionError, OAIAPIError)
 AnthropicErrors = (AnthAPIError, AnthAPIConnectionError, AnthAPITimeoutError, AnthAPIStatusError)
 
 

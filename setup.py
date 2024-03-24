@@ -18,6 +18,14 @@ setup(name='python-jsonllm',
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License"
       ],
-      install_requires=['retry', 'vertexai', 'openai', 'google-cloud-aiplatform', 'tiktoken', 'anthropic', 'python-dotenv'],
+      install_requires=[
+        'retry==0.9.2', 
+        'vertexai==1.43.0', 
+        'openai==1.14.2', 
+        'google-cloud-aiplatform==1.44.0', 
+        'tiktoken==0.6.0', 
+        'anthropic==0.21.3',
+        'python-dotenv==1.0.1'
+      ],
       python_requires='>=3.8',
       include_package_data=True)

@@ -2,7 +2,9 @@ import os
 from typing import Dict, Union
 
 import dotenv
-from openai import ChatCompletion, Completion
+from openai import OpenAI
+from openai.types import Completion
+from openai.types.chat import ChatCompletion
 from vertexai.preview.language_models import ChatModel, TextGenerationModel # type: ignore
 from anthropic import Anthropic
  
@@ -11,9 +13,12 @@ from .constants import MAX_TOKENS, DEFAULT_MODEL_KWARGS, OPENAI_MODELS, GOOGLE_M
 
 try:
     dotenv.load_dotenv()
-    anthropic_client = Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+    if os.environ.get('OPENAI_API_KEY'): openai_client = OpenAI()
+    if os.environ.get('ANTHROPIC_API_KEY'): anthropic_client = Anthropic()
 except Exception as e:
-    client = None
+    print(f"Failed to load environment variables: {e}")
+    raise e
+
 
 
 class _Completion:
@@ -42,8 +47,7 @@ class _Completion:
                 raise Exception("Failed to complete prompt, not enough tokens left. Try reducing prompt length.")
             if 'gpt-3.5-turbo' in model:
                 system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
-                return ChatCompletion.create(
-                    model=model, **model_kwargs, 
+                return openai_client.chat.completions.create(model=model, **model_kwargs, 
                     messages=[{'role':'system', 'content': system_prompt}, {'role':'user', 'content':prompt}], 
                 ).choices[0].message.content # type: ignore
             elif any([m in model for m in ['ada', 'babbage', 'curie', 'davinci']]):
