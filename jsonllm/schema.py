@@ -9,7 +9,6 @@ from jsonllm.constants import (
     SCHEMA_PLACEHOLDER,
     TEXT_PLACEHOLDER,
     JSONCompatible,
-    JSONtypes
 )
 
 class Validator: pass

@@ -17,7 +17,7 @@ from anthropic import (APIError as AnthAPIError,
                        APITimeoutError as AnthAPITimeoutError, 
                        APIStatusError as AnthAPIStatusError)
 
-from .constants import REPLACEMENTS, REGEX_PATTERNS, JSONCompatible
+from .constants import REPLACEMENTS, REGEX_PATTERNS
 
 OpenAIErrors = (OAIRateLimitError, OAIAPIConnectionError, OAIAPIError, OAIServiceUnavailableError, OAITimeout)
 AnthropicErrors = (AnthAPIError, AnthAPIConnectionError, AnthAPITimeoutError, AnthAPIStatusError)

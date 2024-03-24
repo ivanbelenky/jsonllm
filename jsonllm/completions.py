@@ -4,10 +4,10 @@ from typing import Dict, Union
 import dotenv
 from openai import ChatCompletion, Completion
 from vertexai.preview.language_models import ChatModel, TextGenerationModel # type: ignore
-from anthropic import Anthropic, APIError, APIConnectionError, APITimeoutError, APIStatusError
+from anthropic import Anthropic
  
 from .utils import no_tokens, OpenAIErrors, AnthropicErrors
-from .constants import MAX_TOKENS, DEFAULT_MODEL_KWARGS, OPENAI_MODELS, GOOGLE_MODELS, ANTHROPIC_MODELS
+from .constants import MAX_TOKENS, DEFAULT_MODEL_KWARGS, OPENAI_MODELS, GOOGLE_MODELS, ANTHROPIC_MODELS, DEFAULT_SYSTEM_PROMPT
 
 try:
     dotenv.load_dotenv()
@@ -35,15 +35,19 @@ class _Completion:
             raise _Completion.ClientError(f"Failed to complete prompt: {e}")
 
     @staticmethod
-    def _openai(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
+    def _openai(prompt: str, model: str, system_prompt: str=None, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
         try:
             model_kwargs = model_kwargs or DEFAULT_MODEL_KWARGS[model]
             if MAX_TOKENS[model] - no_tokens(prompt) < 0:
                 raise Exception("Failed to complete prompt, not enough tokens left. Try reducing prompt length.")
             if 'gpt-3.5-turbo' in model:
-                return ChatCompletion.create(model=model, messages=[{'role':'user','content':prompt}], **model_kwargs).choices[0].message.content # type: ignore
+                system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+                return ChatCompletion.create(
+                    model=model, **model_kwargs, 
+                    messages=[{'role':'system', 'content': system_prompt}, {'role':'user', 'content':prompt}], 
+                ).choices[0].message.content # type: ignore
             elif any([m in model for m in ['ada', 'babbage', 'curie', 'davinci']]):
-                return Completion.create(model=model ,prompt=prompt, **model_kwargs).choices[0].text # type: ignore
+                return Completion.create(model=model, prompt=prompt, **model_kwargs).choices[0].text # type: ignore
         except OpenAIErrors as e:
             raise _Completion.ServerError(f"Failed to complete prompt: {e}")
         except Exception as e:

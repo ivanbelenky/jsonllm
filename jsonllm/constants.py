@@ -27,15 +27,21 @@ MAX_TOKENS = {
 }
 
 DEFAULT_TEMPERATURE = 0.
+DEFAULT_SYSTEM_PROMPT = 'You are an expert dedicated to transform natural langauge text to JSON given a format schema'
+DEFAULT_BISON_KWARGS = {'temperature': DEFAULT_TEMPERATURE, 'max_output_tokens': 1024, 'top_p': 0.8, 'top_k': 40}
+DEFAULT_CLAUDE_KWARGS = {'temperature': DEFAULT_TEMPERATURE, 'max_tokens': 4096, 'system': DEFAULT_SYSTEM_PROMPT}
+
 DEFAULT_MODEL_KWARGS: Dict[str, Dict[str, Any]] = {
-    'chat-bison@001': {'temperature': DEFAULT_TEMPERATURE, 'max_output_tokens': 1024, 'top_p': 0.8, 'top_k': 40},
-    'text-bison@001': {'temperature': DEFAULT_TEMPERATURE, 'max_output_tokens': 1024, 'top_p': 0.8, 'top_k': 40},
+    'chat-bison@001': DEFAULT_BISON_KWARGS,
+    'text-bison@001': DEFAULT_BISON_KWARGS,
     'ada': {'temperature': DEFAULT_TEMPERATURE},
     'babbage': {'temperature': DEFAULT_TEMPERATURE},
     'curie': {'temperature': DEFAULT_TEMPERATURE},
     'davinci': {'temperature': DEFAULT_TEMPERATURE},
-    'gpt-3.5-turbo': {'temperature': DEFAULT_TEMPERATURE},
-    'claude-3-opus-20240229': {'temperature': DEFAULT_TEMPERATURE, 'max_tokens': 4096},
+    'gpt-3.5-turbo': {'temperature': DEFAULT_TEMPERATURE, 'response_format': { "type": "json_object" }},
+    'claude-3-opus-20240229': DEFAULT_CLAUDE_KWARGS,
+    'claude-3-haiku-20240307': DEFAULT_CLAUDE_KWARGS,
+    'claude-3-sonnet-20240229': DEFAULT_CLAUDE_KWARGS,
 }
 
 EXAMPLES_PROMPTS = [
