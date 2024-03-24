@@ -3,8 +3,6 @@ from typing import Dict, Union
 
 import dotenv
 from openai import OpenAI
-from openai.types import Completion
-from openai.types.chat import ChatCompletion
 from vertexai.preview.language_models import ChatModel, TextGenerationModel # type: ignore
 from anthropic import Anthropic
  
@@ -45,18 +43,14 @@ class _Completion:
             model_kwargs = model_kwargs or DEFAULT_MODEL_KWARGS[model]
             if MAX_TOKENS[model] - no_tokens(prompt) < 0:
                 raise Exception("Failed to complete prompt, not enough tokens left. Try reducing prompt length.")
-            if 'gpt-3.5-turbo' in model:
-                system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
-                return openai_client.chat.completions.create(model=model, **model_kwargs, 
-                    messages=[{'role':'system', 'content': system_prompt}, {'role':'user', 'content':prompt}], 
-                ).choices[0].message.content # type: ignore
-            elif any([m in model for m in ['ada', 'babbage', 'curie', 'davinci']]):
-                return Completion.create(model=model, prompt=prompt, **model_kwargs).choices[0].text # type: ignore
+            system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+            return openai_client.chat.completions.create(model=model, **model_kwargs, 
+                messages=[{'role':'system', 'content': system_prompt}, {'role':'user', 'content':prompt}],
+            ).choices[0].message.content # type: ignore
         except OpenAIErrors as e:
             raise _Completion.ServerError(f"Failed to complete prompt: {e}")
         except Exception as e:
             raise _Completion.ClientError(f"Failed to complete prompt: {e}")
-        raise ValueError(f"Model {model} not implemented")
 
     @staticmethod
     def _google(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
@@ -73,7 +67,7 @@ class _Completion:
 
     @staticmethod
     def complete_prompt(prompt: str, model: str, **model_kwargs: Dict[str, Union[str, float, int]]) -> str:
-        if model in OPENAI_MODELS: return _Completion._openai(prompt, model=model, **model_kwargs)
+        if any(oai_model in model for oai_model in OPENAI_MODELS): return _Completion._openai(prompt, model=model, **model_kwargs)
         elif model in GOOGLE_MODELS: return _Completion._google(prompt, model=model, **model_kwargs)
         elif model in ANTHROPIC_MODELS: return _Completion._anthropic(prompt, model=model, **model_kwargs)
         else: raise NotImplementedError(f"Completion model {model} not implemented")

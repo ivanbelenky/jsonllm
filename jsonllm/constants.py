@@ -11,7 +11,7 @@ REPLACEMENTS: List[Dict[str, str]] = [
     '\n': ''
 }]
 
-OPENAI_MODELS = ['ada', 'babbage', 'curie', 'davinci', 'gpt-3.5-turbo']
+OPENAI_MODELS = ['gpt-3.5-turbo', 'gpt-4']
 GOOGLE_MODELS = ['chat-bison@001', 'text-bison@001']
 ANTHROPIC_MODELS = ['claude-3-opus-20240229']
 
@@ -19,11 +19,8 @@ REGEX_PATTERNS = [r'{[^{}]*}', r'\[[^\[\]]*\]']
 
 MAX_TOKENS = {
     'chat-bison@001': float('inf'), 
-    'ada': 2048,
-    'babbage': 2048,
-    'curie': 2048,
-    'davinci': 2048,
     'gpt-3.5-turbo': 4096,
+    'gpt-4': 4096,
 }
 
 DEFAULT_TEMPERATURE = 0.
@@ -34,11 +31,8 @@ DEFAULT_CLAUDE_KWARGS = {'temperature': DEFAULT_TEMPERATURE, 'max_tokens': 4096,
 DEFAULT_MODEL_KWARGS: Dict[str, Dict[str, Any]] = {
     'chat-bison@001': DEFAULT_BISON_KWARGS,
     'text-bison@001': DEFAULT_BISON_KWARGS,
-    'ada': {'temperature': DEFAULT_TEMPERATURE},
-    'babbage': {'temperature': DEFAULT_TEMPERATURE},
-    'curie': {'temperature': DEFAULT_TEMPERATURE},
-    'davinci': {'temperature': DEFAULT_TEMPERATURE},
     'gpt-3.5-turbo': {'temperature': DEFAULT_TEMPERATURE, 'response_format': { "type": "json_object" }},
+    'gpt-4': {'temperature': DEFAULT_TEMPERATURE},
     'claude-3-opus-20240229': DEFAULT_CLAUDE_KWARGS,
     'claude-3-haiku-20240307': DEFAULT_CLAUDE_KWARGS,
     'claude-3-sonnet-20240229': DEFAULT_CLAUDE_KWARGS,
