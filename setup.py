@@ -6,10 +6,11 @@ with open(os.path.join(directory, 'README.md'), encoding='utf-8') as f:
   long_description = f.read()
 
 setup(name='python-jsonllm',
-      version='0.0.2',
+      version='0.0.2a',
       description='LLM please cast to JSON',
       author='Ivan Belenky',
       license='MIT',
+      url = 'https://github.com/ivanbelenky/jsonllm',
       long_description=long_description,
       long_description_content_type='text/markdown',
       packages = ['jsonllm'],
