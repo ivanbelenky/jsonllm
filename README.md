@@ -47,11 +47,9 @@ class Schema(TypedDict):
 import os
 
 import jsonllm
-import openai
 
-# vertexai.init(project_id='jsonllm-rocks?', location='us-central1') | 
-# openai.api_key = 'sk-...'
-os.environ['ANTHROPIC_API_KEY'] = '...' # or load env
+#assert os.environ.get('ANTHROPIC_API_KEY') != None
+#assert os.environ.get('OPENAI_API_KEY') != None
 
 person = {
     'first_name': {
