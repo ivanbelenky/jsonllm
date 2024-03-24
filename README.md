@@ -1,10 +1,18 @@
-## `jsonllm` << `Marvin` 
+## `jsonllm` 
 -----------------------
 
 ![image](https://github.com/ivanbelenky/jsonllm/assets/49297252/d0526122-0199-4434-ad3c-19d11a3a9fd4)
 
 ## Installation
 ---------------
+
+### From PyPI
+
+```bash
+pip install python-jsonllm
+```
+
+
 ### From source
 
 ```bash
