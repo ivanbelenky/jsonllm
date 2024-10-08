@@ -63,7 +63,7 @@ person = {
         'instructions': 'Find the last name, if not found input Doe'
     },
     'date_of_birth': {
-        'name': 'dob',
+        'name': 'dob', # this exists just the name of the desired schema is not self explanatory
         'type': str,
         'instructions': 'Find the date of birth and cast it to isoformat'
     }
