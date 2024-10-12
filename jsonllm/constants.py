@@ -11,7 +11,7 @@ REPLACEMENTS: List[Dict[str, str]] = [
     '\n': ''
 }]
 
-OPENAI_MODELS = ['gpt-3.5-turbo', 'gpt-4']
+OPENAI_MODELS = ['gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gpt-4o-mini']
 GOOGLE_MODELS = ['chat-bison@001', 'text-bison@001']
 ANTHROPIC_MODELS = ['claude-3-opus-20240229']
 
@@ -33,6 +33,8 @@ DEFAULT_MODEL_KWARGS: Dict[str, Dict[str, Any]] = {
     'text-bison@001': DEFAULT_BISON_KWARGS,
     'gpt-3.5-turbo': {'temperature': DEFAULT_TEMPERATURE, 'response_format': { "type": "json_object" }},
     'gpt-4': {'temperature': DEFAULT_TEMPERATURE},
+    'gpt-4o': {'temperature': DEFAULT_TEMPERATURE, 'response_format': { "type": "json_object" }},
+    'gpt-4o-mini': {'temperature': DEFAULT_TEMPERATURE, 'response_format': { "type": "json_object" }},
     'claude-3-opus-20240229': DEFAULT_CLAUDE_KWARGS,
     'claude-3-haiku-20240307': DEFAULT_CLAUDE_KWARGS,
     'claude-3-sonnet-20240229': DEFAULT_CLAUDE_KWARGS,
@@ -45,14 +47,15 @@ EXAMPLES_PROMPTS = [
 SCHEMA_PLACEHOLDER = '<schema>'
 TEXT_PLACEHOLDER = '<text>'
 PROMPT_TO_PARSE_SCHEMA = f"""
-Given the following text:
+As a genius expert, your task is to understand the content of the following text 
 
 \"\"\"
 {TEXT_PLACEHOLDER}
 \"\"\"
 
-Create a JSON object with the following keys. If keys are not found input null.
-Follow the instructions to find the key values in the text.
+Create a JSON object with the following schema. If keys are not found input null.
+Follow the extra instructions to find the key values in the text. Refrain from outputting
+anything but the keys
 
 {SCHEMA_PLACEHOLDER}
 """
